@@ -4,8 +4,9 @@
   "description": "Backend for KaamExpress using Express.js and MongoDB",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "build": "echo 'No build step required'"
   },
   "keywords": [],
   "author": "",
