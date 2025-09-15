@@ -1,0 +1,116 @@
+export const admin = {
+  workers: [
+    { id: 11, name: "Rahul Sharma", status: "Approved" },
+    { id: 12, name: "Suresh Yadav", status: "Pending" },
+    { id: 13, name: "Priya Mehta", status: "Approved" },
+    { id: 14, name: "Ankit Verma", status: "Rejected" },
+    { id: 15, name: "Neha Singh", status: "Approved" },
+    { id: 16, name: "Ravi Patel", status: "Approved" },
+    { id: 17, name: "Karan Gupta", status: "Pending" },
+    { id: 18, name: "Sneha Nair", status: "Approved" },
+    { id: 19, name: "Deepak Joshi", status: "Approved" },
+    { id: 20, name: "Aditi Rao", status: "Pending" },
+    // ... add up to 50 workers
+  ],
+
+  customers: [
+    { id: 1, name: "Amir Khan", bookings: 5 },
+    { id: 2, name: "Sonia Patel", bookings: 2 },
+    { id: 3, name: "Rohit Kumar", bookings: 3 },
+    { id: 4, name: "Meena Desai", bookings: 7 },
+    { id: 5, name: "Arjun Reddy", bookings: 1 },
+    { id: 6, name: "Pooja Sharma", bookings: 4 },
+    { id: 7, name: "Ishaan Kapoor", bookings: 6 },
+    { id: 8, name: "Anjali Singh", bookings: 2 },
+    { id: 9, name: "Rajesh Nair", bookings: 8 },
+    { id: 10, name: "Kavita Chauhan", bookings: 3 },
+    // ... add up to 50 customers
+  ],
+
+  services: [
+    "Carpentry",
+    "Plumbing",
+    "Electrical",
+    "Cleaning",
+    "Painting",
+    "Gardening",
+    "Masonry",
+    "Appliance Repair",
+    "Interior Design",
+    "Pest Control",
+  ],
+
+  bookings: [
+    {
+      id: 401,
+      service: "Plumbing",
+      customer: "Amir Khan",
+      worker: "Suresh Yadav",
+      status: "Dispute",
+    },
+    {
+      id: 402,
+      service: "Electrical",
+      customer: "Sonia Patel",
+      worker: "Rahul Sharma",
+      status: "Completed",
+    },
+    {
+      id: 403,
+      service: "Carpentry",
+      customer: "Rohit Kumar",
+      worker: "Neha Singh",
+      status: "Pending",
+    },
+    {
+      id: 404,
+      service: "Cleaning",
+      customer: "Meena Desai",
+      worker: "Karan Gupta",
+      status: "Approved",
+    },
+    {
+      id: 405,
+      service: "Gardening",
+      customer: "Arjun Reddy",
+      worker: "Priya Mehta",
+      status: "Completed",
+    },
+    {
+      id: 406,
+      service: "Painting",
+      customer: "Pooja Sharma",
+      worker: "Ravi Patel",
+      status: "Cancelled",
+    },
+    {
+      id: 407,
+      service: "Masonry",
+      customer: "Ishaan Kapoor",
+      worker: "Deepak Joshi",
+      status: "Completed",
+    },
+    {
+      id: 408,
+      service: "Appliance Repair",
+      customer: "Anjali Singh",
+      worker: "Sneha Nair",
+      status: "Pending",
+    },
+    {
+      id: 409,
+      service: "Interior Design",
+      customer: "Rajesh Nair",
+      worker: "Aditi Rao",
+      status: "Approved",
+    },
+    {
+      id: 410,
+      service: "Pest Control",
+      customer: "Kavita Chauhan",
+      worker: "Ankit Verma",
+      status: "Completed",
+    },
+    // ... add 100+ bookings
+  ],
+};

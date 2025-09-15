@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+/* :root {
+  --primary: #181f2a;
+  --secondary: #232b36;
+  --accent: #38bdf8;
+  --card: #232b36;
+  --navbar: #181f2a;
+} */
+
+/* ================================
+   🌟 KaamExpress Global Theme
+   ================================ */
+:root {
+  /* Colors */
+  --primary: #0f172a;         /* Dark / Deep Navy background */
+  --secondary: #1e293b;       /* Card / section background */
+  --accent: #14b8a6;          /* Teal brand color */
+  --accent-light: #5eead4;    /* Light Teal */
+  --accent-hover: #0d9488;    /* Darker teal on hover */
+  --highlight: #38bdf8;       /* Cyan for subtle highlights */
+  --gradient-start: #1e3a8a;  /* Indigo blue for gradients */
+  --gradient-end: #0f172a;    /* Dark navy for gradients */
+
+  /* Text */
+  --text-light: #f8fafc;      /* Light / white-ish text */
+  --text-dark: #f1f5f9;       /* Light text (alternate) */
+  --text-muted: #94a3b8;      /* Muted gray text */
+
+  /* Cards & Borders */
+  --card: #1e293b;             /* Card background */
+  --navbar: #0f172a;           /* Navbar background */
+  --border-color: rgba(255, 255, 255, 0.1);
+  --shadow-accent: 0 4px 20px rgba(20, 184, 166, 0.3);
+}
+
+/* ================================
+   🌌 Base Styling
+   ================================ */
+body {
+  background-color: var(--primary);
+  color: var(--text-light);
+  font-family: 'Inter', 'Poppins', sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* Input / Search Bar */
+input {
+  background: var(--secondary);
+  border: 1px solid #334155;
+  color: var(--text-light);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+input:hover {
+  border-color: var(--accent);
+}
+input:focus {
+  box-shadow: 0 0 10px var(--accent-light);
+  outline: none;
+}
+
+/* ================================
+   🌟 Buttons
+   ================================ */
+.btn-accent {
+  background: var(--accent);
+  color: var(--primary);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  box-shadow: var(--shadow-accent);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.btn-accent:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 25px rgba(20, 184, 166, 0.5);
+}
+
+/* ================================
+   🌟 Cards
+   ================================ */
+.card-glass {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+.card-glass:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-accent);
+}
+
+/* ================================
+   🌟 Sections
+   ================================ */
+.section-gradient {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: var(--text-light);
+  padding: 2rem;
+}
+
+/* Homepage Header */
+.homepage-header h1 {
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fade-in-up 1s ease-out;
+}
+.homepage-header p {
+  animation: fade-in-up 1.2s ease-out;
+}
+
+/* Search Bar Container */
+.search-bar input {
+  border-radius: 0.5rem;
+}
+
+/* ================================
+   ✨ Animations
+   ================================ */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 2s infinite;
+}

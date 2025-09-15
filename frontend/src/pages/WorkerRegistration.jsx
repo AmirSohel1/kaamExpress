@@ -1,0 +1,233 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { registerWoker, fetchServices } from "../api"; // Your API functions
+
+export default function WorkerRegistration() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const prefilledData = location.state || {};
+  const userId = prefilledData?.user?.id; // safer check
+
+  const [services, setServices] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [form, setForm] = useState({
+    selectedServices: [],
+    customSkills: "",
+    experience: "",
+    address: "",
+    availability: true,
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Fetch services
+  useEffect(() => {
+    const getServices = async () => {
+      try {
+        const data = await fetchServices();
+        setServices(data);
+      } catch (err) {
+        console.error("Failed to fetch services:", err);
+      }
+    };
+    getServices();
+  }, []);
+
+  // Toggle service selection
+  const toggleService = (id) => {
+    setForm((prev) => {
+      const alreadySelected = prev.selectedServices.includes(id);
+      return {
+        ...prev,
+        selectedServices: alreadySelected
+          ? prev.selectedServices.filter((s) => s !== id)
+          : [...prev.selectedServices, id],
+      };
+    });
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!userId) {
+      setError("User ID missing. Please sign up again.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const payload = {
+        user: userId,
+        services: form.selectedServices,
+        customSkills: form.customSkills
+          ? form.customSkills.split(",").map((s) => s.trim())
+          : [],
+        experience: Number(form.experience),
+        address: form.address,
+        availability: form.availability,
+      };
+
+      const res = await registerWoker(payload);
+      console.log("Worker registered:", res);
+
+      navigate("/login");
+    } catch (err) {
+      console.error("Registration failed:", err);
+      setError("Failed to complete registration. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-indigo-900 to-gray-900 px-4">
+      <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 animate-fadeIn">
+        {/* Branding */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-teal-400">KaamExpress</h1>
+          <p className="text-gray-300 mt-1 text-sm">
+            Complete your profile to start working.
+          </p>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="text-red-400 bg-red-900/30 border border-red-500 text-sm px-3 py-2 rounded mb-4 text-center">
+            {error}
+          </div>
+        )}
+
+        {/* Form */}
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Services Dropdown */}
+          <div className="relative">
+            <label className="block text-sm text-gray-200 mb-1">
+              Select Services
+            </label>
+            <button
+              type="button"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-400 text-left"
+            >
+              {form.selectedServices.length > 0
+                ? `${form.selectedServices.length} service(s) selected`
+                : "Choose services"}
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute z-10 mt-2 w-full bg-gray-900 border border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                {services.map((srv) => (
+                  <label
+                    key={srv._id}
+                    className="flex items-center text-gray-300 px-3 py-2 cursor-pointer hover:bg-gray-800"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.selectedServices.includes(srv._id)}
+                      onChange={() => toggleService(srv._id)}
+                      className="mr-2"
+                    />
+                    {srv.name}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Custom Skills */}
+          <div>
+            <label
+              htmlFor="customSkills"
+              className="block text-sm text-gray-200 mb-1"
+            >
+              Other Skills (comma separated)
+            </label>
+            <input
+              id="customSkills"
+              name="customSkills"
+              value={form.customSkills}
+              onChange={handleChange}
+              placeholder="e.g. furniture repair, driving"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-400"
+            />
+          </div>
+
+          {/* Experience */}
+          <div>
+            <label
+              htmlFor="experience"
+              className="block text-sm text-gray-200 mb-1"
+            >
+              Experience (years)
+            </label>
+            <input
+              id="experience"
+              name="experience"
+              type="number"
+              min="0"
+              value={form.experience}
+              onChange={handleChange}
+              placeholder="Enter years of experience"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              required
+            />
+          </div>
+
+          {/* Address */}
+          <div>
+            <label
+              htmlFor="address"
+              className="block text-sm text-gray-200 mb-1"
+            >
+              Address
+            </label>
+            <textarea
+              id="address"
+              name="address"
+              rows="2"
+              value={form.address}
+              onChange={handleChange}
+              placeholder="Enter your full address"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-400 resize-none"
+              required
+            />
+          </div>
+
+          {/* Availability */}
+          <div className="flex items-center gap-2">
+            <input
+              id="availability"
+              name="availability"
+              type="checkbox"
+              checked={form.availability}
+              onChange={handleChange}
+              className="h-4 w-4 text-teal-400 border-gray-300 rounded focus:ring-teal-400"
+            />
+            <label htmlFor="availability" className="text-sm text-gray-300">
+              Available for work
+            </label>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-lg bg-teal-500 text-gray-900 font-semibold hover:bg-teal-400 transition-colors duration-300 shadow-md disabled:opacity-50"
+          >
+            {loading ? "Registering..." : "Complete Registration"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
