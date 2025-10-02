@@ -1,13 +1,5 @@
 @import "tailwindcss";
 
-/* :root {
-  --primary: #181f2a;
-  --secondary: #232b36;
-  --accent: #38bdf8;
-  --card: #232b36;
-  --navbar: #181f2a;
-} */
-
 /* ================================
    🌟 KaamExpress Global Theme
    ================================ */
@@ -44,9 +36,20 @@ body {
   line-height: 1.6;
   margin: 0;
   padding: 0;
+
+  /* Hide scrollbar but allow scrolling */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  overflow-y: scroll; /* Ensure scrolling works */
 }
 
-/* Input / Search Bar */
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* ================================
+   🌟 Inputs
+   ================================ */
 input {
   background: var(--secondary);
   border: 1px solid #334155;
@@ -55,9 +58,11 @@ input {
   border-radius: 0.5rem;
   transition: all 0.3s ease;
 }
+
 input:hover {
   border-color: var(--accent);
 }
+
 input:focus {
   box-shadow: 0 0 10px var(--accent-light);
   outline: none;
@@ -76,6 +81,7 @@ input:focus {
   transition: all 0.3s ease;
   cursor: pointer;
 }
+
 .btn-accent:hover {
   background: var(--accent-hover);
   transform: translateY(-2px) scale(1.02);
@@ -93,6 +99,7 @@ input:focus {
   padding: 1.5rem;
   transition: all 0.3s ease;
 }
+
 .card-glass:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-accent);
@@ -114,6 +121,7 @@ input:focus {
   -webkit-text-fill-color: transparent;
   animation: fade-in-up 1s ease-out;
 }
+
 .homepage-header p {
   animation: fade-in-up 1.2s ease-out;
 }
@@ -136,6 +144,7 @@ input:focus {
     transform: translateY(0);
   }
 }
+
 .animate-fade-in-up {
   animation: fade-in-up 0.8s ease-out forwards;
 }
@@ -150,6 +159,7 @@ input:focus {
     opacity: 1;
   }
 }
+
 .animate-pulse-slow {
   animation: pulse-slow 2s infinite;
 }

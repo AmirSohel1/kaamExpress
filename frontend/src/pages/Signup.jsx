@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { signup } from "../api/auth";
+import { signup } from "../api/auth"; // <-- must point to your backend API wrapper
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -8,14 +8,15 @@ export default function SignupPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "",
     phone: "",
-    role: "customer",
+    password: "",
+    role: "customer", // default
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Handle input change
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -23,25 +24,55 @@ export default function SignupPage() {
     });
   };
 
+  // Validate before sending
+  const validateForm = () => {
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.password ||
+      !formData.role
+    ) {
+      setError("All fields are required");
+      return false;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      setError("Invalid email address");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return false;
+    }
+    if (!/^\+?[0-9]{7,15}$/.test(formData.phone)) {
+      setError("Invalid phone number");
+      return false;
+    }
+    return true;
+  };
+
+  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!validateForm()) return;
+
     setLoading(true);
 
     try {
-      const res = await signup(formData);
-      console.log("Signup success:", res);
+      const res = await signup(formData); // sends { name, email, phone, password, role }
+      console.log("Signup success:", res.data);
 
+      // If worker → setup profile, else → go login
       if (formData.role === "worker") {
-        navigate("/worker-profile-setup", { state: res.data });
+        navigate("/worker-profile-setup", { state: res.data.user });
       } else {
         navigate("/login");
       }
     } catch (err) {
       console.error("Signup error:", err);
-      setError(
-        err.response?.data?.message || "Signup failed. Please try again."
-      );
+      setError(err.response?.data?.error || "Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -49,7 +80,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-indigo-900 to-gray-900 px-4">
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 transition-all duration-500 ease-in-out animate-fadeIn">
+      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
         {/* Branding */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-teal-400 tracking-wide">
@@ -78,9 +109,9 @@ export default function SignupPage() {
               id="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 transition"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
               type="text"
-              placeholder="Enter your name"
+              placeholder="Enter your full name"
               required
             />
           </div>
@@ -94,7 +125,7 @@ export default function SignupPage() {
               id="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 transition"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
               type="email"
               placeholder="you@example.com"
               required
@@ -110,7 +141,7 @@ export default function SignupPage() {
               id="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 transition"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
               type="tel"
               placeholder="+91 9876543210"
               required
@@ -129,7 +160,7 @@ export default function SignupPage() {
               id="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 transition"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
               type="password"
               placeholder="••••••••"
               required
@@ -145,7 +176,8 @@ export default function SignupPage() {
               id="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 transition"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+              required
             >
               <option value="customer">Customer</option>
               <option value="worker">Worker</option>
@@ -156,7 +188,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-lg bg-teal-500 text-gray-900 font-semibold hover:bg-teal-400 transition-colors duration-300 shadow-md disabled:opacity-50"
+            className="w-full py-3 rounded-lg bg-teal-500 text-gray-900 font-semibold hover:bg-teal-400 transition-colors shadow-md disabled:opacity-50"
           >
             {loading ? "Signing up..." : "Sign Up"}
           </button>

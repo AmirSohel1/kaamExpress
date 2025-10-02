@@ -1,48 +1,78 @@
-// Public: Get worker profile by ID (for customers)
-exports.getPublicWorkerProfile = async (req, res, next) => {
-  try {
-    const worker = await Worker.findById(req.params.id)
-      .populate("user", "name email role avatar") // Only expose safe fields
-      .populate({
-        path: "jobs",
-        select: "service date status address payment totalAmount",
-        populate: { path: "service", select: "name category" },
-      });
-    if (!worker) return res.status(404).json({ error: "Worker not found" });
-    // Optionally filter out fields you don't want to expose
-    const workerObj = worker.toObject();
-    delete workerObj.user.password;
-    // You may also want to filter earnings, etc.
-    res.json(workerObj);
-  } catch (err) {
-    next(err);
-  }
-};
 const Worker = require("../models/Worker");
 const User = require("../models/User");
 const Service = require("../models/Service");
 
-// Create a worker
+// =======================
+// Update worker
+// =======================
+exports.updateWorker = async (req, res, next) => {
+  try {
+    const { ...workerUpdates } = req.body;
+    const workerId = req.params.id;
+
+    // Check if worker exists
+    const worker = await Worker.findById(workerId);
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+
+    // Worker can only update their own profile unless admin
+    if (req.user.role !== "admin" && String(worker.user) !== req.user.id) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to update this worker" });
+    }
+
+    const updatedWorker = await Worker.findByIdAndUpdate(
+      workerId,
+      { ...workerUpdates, updatedAt: Date.now() },
+      { new: true }
+    ).populate("user", "-password");
+
+    res.json(updatedWorker);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// =======================
+// Get my profile (Worker)
+// =======================
+exports.getMyProfile = async (req, res, next) => {
+  try {
+    const worker = await Worker.findOne({ user: req.user.id }).populate(
+      "user",
+      "-password"
+    );
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+    res.json(worker);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// =======================
+// Create worker (Admin only)
+// =======================
 exports.createWorker = async (req, res, next) => {
   try {
-    const { user, services, customSkills, experience, address, availability } =
-      req.body;
+    const {
+      user,
+      services,
+      customSkills,
+      experience,
+      workingAvailableAddress,
+      availability,
+    } = req.body;
 
-    // Check if User exists and is a worker
     const existingUser = await User.findById(user);
     if (!existingUser || existingUser.role !== "worker") {
       return res.status(400).json({ error: "User not found or not a worker" });
     }
 
-    // Prevent duplicate worker profile
     const existingWorker = await Worker.findOne({ user });
     if (existingWorker) {
-      return res
-        .status(400)
-        .json({ error: "Worker document already exists for this User" });
+      return res.status(400).json({ error: "Worker profile already exists" });
     }
 
-    // Validate services (optional, ensure they exist in DB)
     if (services && services.length > 0) {
       const validServices = await Service.find({ _id: { $in: services } });
       if (validServices.length !== services.length) {
@@ -57,7 +87,7 @@ exports.createWorker = async (req, res, next) => {
       services,
       customSkills,
       experience,
-      address,
+      workingAvailableAddress,
       availability,
     });
 
@@ -72,7 +102,29 @@ exports.createWorker = async (req, res, next) => {
   }
 };
 
+// =======================
+// Get public worker profile
+// =======================
+exports.getPublicWorkerProfile = async (req, res, next) => {
+  try {
+    const worker = await Worker.findById(req.params.id)
+      .populate("user", "name email role avatar")
+      .populate({
+        path: "jobs",
+        select: "service date status address payment totalAmount",
+        populate: { path: "service", select: "name category" },
+      });
+
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+    res.json(worker);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// =======================
 // Get all workers (Admin only)
+// =======================
 exports.getAllWorkers = async (req, res, next) => {
   try {
     if (req.user.role !== "admin") {
@@ -97,7 +149,9 @@ exports.getAllWorkers = async (req, res, next) => {
   }
 };
 
+// =======================
 // Get worker by ID
+// =======================
 exports.getWorkerById = async (req, res, next) => {
   try {
     const worker = await Worker.findById(req.params.id).populate(
@@ -111,39 +165,9 @@ exports.getWorkerById = async (req, res, next) => {
   }
 };
 
-// Get my profile (Worker)
-exports.getMyProfile = async (req, res, next) => {
-  try {
-    const worker = await Worker.findOne({ user: req.user.id }).populate(
-      "user",
-      "-password"
-    );
-    if (!worker) return res.status(404).json({ error: "Worker not found" });
-    res.json(worker);
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Update worker
-exports.updateWorker = async (req, res, next) => {
-  try {
-    const { ...workerUpdates } = req.body;
-
-    const worker = await Worker.findByIdAndUpdate(
-      req.params.id,
-      { ...workerUpdates, updatedAt: Date.now() },
-      { new: true }
-    ).populate("user", "-password");
-
-    if (!worker) return res.status(404).json({ error: "Worker not found" });
-    res.json(worker);
-  } catch (err) {
-    next(err);
-  }
-};
-
+// =======================
 // Delete worker
+// =======================
 exports.deleteWorker = async (req, res, next) => {
   try {
     const worker = await Worker.findByIdAndDelete(req.params.id);
@@ -154,14 +178,16 @@ exports.deleteWorker = async (req, res, next) => {
   }
 };
 
+// =======================
 // Bulk create/update workers (Admin only)
+// =======================
 exports.bulkCreateUpdateWorkers = async (req, res, next) => {
   try {
     const inputWorkers = req.body.workers || [];
 
     const users = await User.find({ role: "worker" });
     if (!users.length) {
-      return res.status(404).json({ error: "No workers found in User table" });
+      return res.status(404).json({ error: "No worker users found" });
     }
 
     const results = [];
@@ -187,11 +213,16 @@ exports.bulkCreateUpdateWorkers = async (req, res, next) => {
   }
 };
 
-// Get workers by service (Public)
+// =======================
+// Get workers by service (via query param)
+// =======================
 exports.getWorkersByService = async (req, res, next) => {
   try {
     const { service } = req.query;
-    const workers = await Worker.find({ skills: service }).populate(
+    if (!service)
+      return res.status(400).json({ error: "Service ID is required" });
+
+    const workers = await Worker.find({ services: service }).populate(
       "user",
       "name email"
     );
@@ -201,6 +232,9 @@ exports.getWorkersByService = async (req, res, next) => {
   }
 };
 
+// =======================
+// Get workers by service ID (public)
+// =======================
 exports.getWorkersByServiceId = async (req, res, next) => {
   try {
     const serviceId = req.params.id;
@@ -208,8 +242,7 @@ exports.getWorkersByServiceId = async (req, res, next) => {
     const service = await Service.findById(serviceId);
     if (!service) return res.status(404).json({ error: "Service not found" });
 
-    // Find workers who have this service name in their skills array
-    const workers = await Worker.find({ skills: service.name }).populate(
+    const workers = await Worker.find({ services: service._id }).populate(
       "user",
       "name email phone role"
     );

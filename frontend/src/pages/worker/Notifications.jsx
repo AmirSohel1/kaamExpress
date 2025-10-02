@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { FaBell, FaCheck, FaTrash, FaTimes, FaFilter } from "react-icons/fa";
-import { fetchNotifications as fetchNotificationsAPI } from "../../api/notifications";
+import {
+  fetchNotifications,
+  markNotificationsRead,
+  deleteNotifications,
+} from "../../api/notifications";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -10,8 +14,9 @@ const Notifications = () => {
   useEffect(() => {
     const loadNotifications = async () => {
       try {
-        const data = await fetchNotificationsAPI();
+        const data = await fetchNotifications();
         setNotifications(data);
+        console.log("Fetched notifications:", data);
       } catch (err) {
         console.error("Error fetching notifications:", err);
       }
@@ -25,16 +30,28 @@ const Notifications = () => {
     );
   };
 
-  const markAsRead = () => {
-    setNotifications((prev) =>
-      prev.map((n) => (selected.includes(n._id) ? { ...n, read: true } : n))
-    );
-    setSelected([]);
+  const markAsRead = async () => {
+    if (selected.length === 0) return;
+    try {
+      await markNotificationsRead(selected);
+      setNotifications((prev) =>
+        prev.map((n) => (selected.includes(n.id) ? { ...n, read: true } : n))
+      );
+      setSelected([]);
+    } catch (err) {
+      console.error("Failed to mark notifications as read", err);
+    }
   };
 
-  const deleteSelected = () => {
-    setNotifications((prev) => prev.filter((n) => !selected.includes(n._id)));
-    setSelected([]);
+  const deleteSelected = async () => {
+    if (selected.length === 0) return;
+    try {
+      await deleteNotifications(selected);
+      setNotifications((prev) => prev.filter((n) => !selected.includes(n.id)));
+      setSelected([]);
+    } catch (err) {
+      console.error("Failed to delete notifications", err);
+    }
   };
 
   const filteredNotifications =
@@ -43,6 +60,23 @@ const Notifications = () => {
       : filter === "unread"
       ? notifications.filter((n) => !n.read)
       : notifications.filter((n) => n.read);
+
+  const getIconFromType = (type) => {
+    switch (type) {
+      case "job":
+      case "booking":
+        return "bell";
+      case "completed":
+      case "rating":
+        return "checkcircle";
+      case "reminder":
+        return "clock";
+      case "payment":
+        return "dollar";
+      default:
+        return "bell";
+    }
+  };
 
   return (
     <div className="w-full min-h-[calc(100vh-4rem)] h-full overflow-y-auto px-4 sm:px-6 py-4 flex flex-col">
@@ -124,20 +158,20 @@ const Notifications = () => {
           {filteredNotifications.length > 0 ? (
             filteredNotifications.map((n) => (
               <li
-                key={String(n._id)}
+                key={String(n.id)}
                 className={`flex items-center gap-2 sm:gap-4 rounded-xl px-4 sm:px-5 py-3 sm:py-4 shadow border transition-all cursor-pointer ${
-                  selected.includes(n._id)
+                  selected.includes(n.id)
                     ? "border-[var(--accent)] bg-[#0e161e]"
                     : n.read
                     ? "opacity-60"
                     : "border-transparent bg-[var(--secondary)]"
                 }`}
-                onClick={() => toggleSelect(n._id)}
+                onClick={() => toggleSelect(n.id)}
               >
                 <input
                   type="checkbox"
-                  checked={selected.includes(n._id)}
-                  onChange={() => toggleSelect(n._id)}
+                  checked={selected.includes(n.id)}
+                  onChange={() => toggleSelect(n.id)}
                   className="accent-[var(--accent)] w-5 h-5 flex-shrink-0"
                   onClick={(e) => e.stopPropagation()}
                 />

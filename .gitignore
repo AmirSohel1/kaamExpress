@@ -12,7 +12,7 @@ backend/dist/
 frontend/dist/
 frontend/build/
 .next/
-
+.vscode
 # Logs
 logs
 *.log

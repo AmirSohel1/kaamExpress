@@ -11,7 +11,7 @@ export const fetchWorkers = async () => {
   // console.log(res.data);
   return res.data;
 };
-export const registerWoker = async (data) => {
+export const registerWorker = async (data) => {
   const res = await api.post("/workers", data);
   return res.data;
 };
@@ -23,4 +23,3 @@ export const deleteWorker = async (workerId) => {
   const res = await api.delete(`/workers/${workerId}`);
   return res.data;
 };
-// Add more worker-related API calls as needed

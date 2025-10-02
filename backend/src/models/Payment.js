@@ -9,25 +9,34 @@ const PaymentSchema = new mongoose.Schema(
     },
     customer: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Customer",
+      ref: "User",
       required: true,
     },
     worker: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Worker",
+      ref: "User",
       required: true,
     },
-    amount: { type: Number, required: true },
+    amount: { type: Number, required: true, min: 0 },
     status: {
       type: String,
-      enum: ["Paid", "Unpaid", "Refunded"],
-      default: "Unpaid",
+      enum: ["Pending", "Paid", "Refunded", "Failed"],
+      default: "Pending",
     },
-    method: { type: String }, // e.g. 'Cash', 'Card', 'UPI'
-    transactionId: { type: String },
-    date: { type: Date, default: Date.now },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
+    method: {
+      type: String,
+      enum: ["Cash", "Card", "UPI", "NetBanking", "Wallet", "Other"],
+      required: true,
+    },
+    transactionId: { type: String, default: null },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );

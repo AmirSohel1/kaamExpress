@@ -5,11 +5,10 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(() => {
     const stored = localStorage.getItem("auth");
-    return stored ? JSON.parse(stored) : { token: null, user: null }; // no extra "role" here
+    return stored ? JSON.parse(stored) : { token: null, user: null };
   });
 
   const login = (data) => {
-    // Save full backend shape { token, user: { name, email, role } }
     localStorage.setItem("auth", JSON.stringify(data));
     setAuth(data);
   };
@@ -18,6 +17,7 @@ export const AuthProvider = ({ children }) => {
     const emptyAuth = { token: null, user: null };
     localStorage.setItem("auth", JSON.stringify(emptyAuth));
     setAuth(emptyAuth);
+    // Navigation is handled in Navbar.jsx after logout
   };
 
   return (

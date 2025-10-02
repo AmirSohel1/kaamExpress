@@ -3,6 +3,7 @@ import Avatar from "react-avatar";
 import { FaStar } from "react-icons/fa";
 
 const WorkerInfoModal = ({ worker, open, onClose }) => {
+  console.log("WorkerInfoModal props:", { worker });
   if (!open || !worker) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">

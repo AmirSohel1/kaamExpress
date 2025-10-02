@@ -1,14 +1,15 @@
 import api from "./api";
 
-// Helper to map backend notification type → frontend icon key
 const getIconFromType = (type) => {
   switch (type) {
     case "booking":
-      return "bell"; // <FaBell />
+      return "bell";
     case "completed":
-      return "checkcircle"; // <FaCheckCircle />
+      return "checkcircle";
     case "reminder":
-      return "clock"; // <FaRegClock />
+      return "clock";
+    case "payment":
+      return "dollar";
     default:
       return "bell";
   }
@@ -17,12 +18,11 @@ const getIconFromType = (type) => {
 export const fetchNotifications = async () => {
   const res = await api.get("/notifications");
 
-  // Normalize backend response to frontend shape
   return res.data.map((n) => ({
-    id: n._id, // map MongoDB _id → id
+    id: n.id || n._id?.toString(), // ensure unique string key
     message: n.message,
-    read: n.read,
-    time: new Date(n.createdAt).toLocaleString(), // convert timestamp
+    read: n.read === true || n.status === "read", // normalize to boolean
+    time: new Date(n.createdAt).toLocaleString(),
     icon: getIconFromType(n.type),
   }));
 };

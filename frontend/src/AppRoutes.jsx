@@ -45,6 +45,8 @@ import LandingPage from "./pages/LandingHome/LandingPage";
 import Signup from "./pages/Signup";
 import Header from "./pages/LandingHome/components/Header";
 import Footer from "./pages/LandingHome/components/Footer";
+import MakePayment from "./components/MakePayment";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
 // Layout for public landing pages
 const PublicLayout = () => (
@@ -92,11 +94,13 @@ const AppRoutes = () => (
       <Route path="/howIsItWork" element={<HowItWorks />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/worker-profile-setup" element={<WorkerRegistration />} />
     </Route>
 
     {/* Protected Customer Routes */}
     <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>
+      <Route path="/worker/make-payment/:bookingId" element={<MakePayment />} />
       <Route element={<DashboardLayout />}>
         <Route path="customer">
           <Route index element={<Homepage />} />

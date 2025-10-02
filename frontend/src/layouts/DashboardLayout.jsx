@@ -1,107 +1,74 @@
-// DashboardLayout.js (Corrected and complete)
-import React, { useState } from "react";
+// DashboardLayout.js (Fixed and Enhanced)
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { Outlet, useLocation } from "react-router-dom";
-import {
-  FaHome,
-  FaCalendarAlt,
-  FaHistory,
-  FaCreditCard,
-  FaBell,
-  FaUserTie,
-  FaWallet,
-  FaStar,
-  FaUser,
-  FaCogs,
-  FaChartBar,
-  FaExclamationTriangle,
-  FaTachometerAlt,
-  FaTools,
-  FaBriefcase,
-} from "react-icons/fa";
-
-const customerSidebar = [
-  { label: "Home", icon: <FaHome />, path: "/customer" },
-  { label: "My Bookings", icon: <FaCalendarAlt />, path: "/customer/bookings" },
-  { label: "History", icon: <FaHistory />, path: "/customer/history" },
-  { label: "Payments", icon: <FaCreditCard />, path: "/customer/payments" },
-  { label: "Notifications", icon: <FaBell />, path: "/customer/notifications" },
-];
-
-const workerSidebar = [
-  { label: "Dashboard", icon: <FaTachometerAlt />, path: "/worker" },
-  { label: "Profile", icon: <FaUserTie />, path: "/worker/profile" },
-  { label: "Jobs", icon: <FaBriefcase />, path: "/worker/jobs" },
-  { label: "Earnings", icon: <FaWallet />, path: "/worker/earnings" },
-  { label: "Ratings", icon: <FaStar />, path: "/worker/ratings" },
-  { label: "Notifications", icon: <FaBell />, path: "/worker/notifications" },
-];
-
-const adminSidebar = [
-  { label: "Dashboard", icon: <FaTachometerAlt />, path: "/admin" },
-  { label: "Workers", icon: <FaUserTie />, path: "/admin/workers" },
-  { label: "Customers", icon: <FaUser />, path: "/admin/customers" },
-  { label: "Services", icon: <FaTools />, path: "/admin/services" },
-  { label: "Bookings", icon: <FaCalendarAlt />, path: "/admin/bookings" },
-  {
-    label: "Disputes",
-    icon: <FaExclamationTriangle />,
-    path: "/admin/disputes",
-  },
-  { label: "Analytics", icon: <FaChartBar />, path: "/admin/analytics" },
-];
-
-const getSidebar = (pathname) => {
-  if (pathname.startsWith("/worker"))
-    return { items: workerSidebar, role: "Worker" };
-  if (pathname.startsWith("/admin"))
-    return { items: adminSidebar, role: "Admin" };
-  return { items: customerSidebar, role: "Customer" };
-};
 
 const DashboardLayout = () => {
   const location = useLocation();
-  const { items, role } = getSidebar(location.pathname);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Handle window resize for responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+
+      // Auto-close sidebar when switching from mobile to desktop
+      if (!mobile && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [sidebarOpen]);
+
+  // Close sidebar when route changes on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname, isMobile]);
 
   return (
-    <div className="min-h-screen bg-primary text-white flex transition-colors duration-300">
-      {/* Sidebar for desktop */}
-      <div className="hidden md:block w-64 fixed inset-y-0 left-0 z-50 transition-transform transform hover:scale-105">
-        <Sidebar items={items} role={role} />
+    <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary text-white flex transition-all duration-500">
+      {/* Sidebar for desktop with proper z-index */}
+      <div className="hidden md:block w-72 fixed inset-y-0 left-0 z-30 transition-all duration-500">
+        <Sidebar />
       </div>
 
-      {/* Sidebar for mobile */}
+      {/* Backdrop for mobile sidebar */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-60 z-40 md:hidden transition-opacity duration-300 ${
-          sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        className={`fixed inset-0 bg-black z-40 md:hidden transition-opacity duration-500 ${
+          sidebarOpen
+            ? "opacity-60 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setSidebarOpen(false)}
       />
+
+      {/* Sidebar for mobile with proper z-index */}
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-[var(--card)] z-50 transform transition-transform duration-300 md:hidden ${
+        className={`fixed inset-y-0 left-0 w-72 bg-card-dark z-40 transform transition-transform duration-500 md:hidden shadow-2xl ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } shadow-2xl`}
+        }`}
       >
-        <Sidebar
-          items={items}
-          role={role}
-          onClose={() => setSidebarOpen(false)}
-        />
+        <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col md:ml-64 animate-fade-in-up h-screen">
-        {/* Fixed Navbar, height 56px (h-14) */}
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col min-h-screen md:ml-72">
+        {/* Fixed Navbar with higher z-index than sidebar */}
         <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        {/* Scrollable main content below Navbar */}
-        <div
-          className="flex-1 overflow-y-auto"
-          style={{ paddingTop: "3.5rem" }}
-        >
-          <main className="p-2 sm:p-4 md:p-8 bg-[var(--primary)] min-h-[calc(100vh-3.5rem)] transition-all duration-300">
-            <Outlet />
+
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto mt-14">
+          <main className="relative p-2 sm:p-4 lg:p-6 bg-gradient-to-b from-primary/10 to-primary/5 min-h-[calc(100vh-3.5rem)] transition-all duration-500 overflow-x-auto">
+            <div className="w-full max-w-6xl mx-auto">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

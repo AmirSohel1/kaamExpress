@@ -1,12 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { registerWoker, fetchServices } from "../api"; // Your API functions
+import { fetchServices } from "../api/services";
+import { registerWorker } from "../api/workers";
 
 export default function WorkerRegistration() {
   const navigate = useNavigate();
   const location = useLocation();
   const prefilledData = location.state || {};
-  const userId = prefilledData?.user?.id; // safer check
+  const auth = localStorage.getItem("auth");
+  let id = null;
+
+  if (auth) {
+    try {
+      const parsed = JSON.parse(auth);
+      // Use optional chaining to avoid crashes
+      id = parsed?.user?.id || null;
+    } catch (err) {
+      console.error("Invalid auth object in localStorage:", err);
+    }
+  }
+
+  const userId = prefilledData?.id || prefilledData?.user?.id || id;
+  // console.log(userId);
 
   const [services, setServices] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -21,20 +36,23 @@ export default function WorkerRegistration() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch services
+  // Fetch services safely
   useEffect(() => {
+    const controller = new AbortController();
     const getServices = async () => {
       try {
-        const data = await fetchServices();
+        const data = await fetchServices({ signal: controller.signal });
         setServices(data);
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error("Failed to fetch services:", err);
+        setError("Could not load available services. Try again later.");
       }
     };
     getServices();
+    return () => controller.abort();
   }, []);
 
-  // Toggle service selection
   const toggleService = (id) => {
     setForm((prev) => {
       const alreadySelected = prev.selectedServices.includes(id);
@@ -57,6 +75,7 @@ export default function WorkerRegistration() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!userId) {
       setError("User ID missing. Please sign up again.");
       return;
@@ -77,13 +96,27 @@ export default function WorkerRegistration() {
         availability: form.availability,
       };
 
-      const res = await registerWoker(payload);
-      console.log("Worker registered:", res);
+      // console.log("📦 Payload being sent:", payload); // 👈 add this
+
+      const res = await registerWorker(payload);
+      // console.log("✅ Worker registered:", res);
+
+      if (auth) {
+        if (Id?.user.role === "worker") {
+          navigate("/worker");
+        }
+      }
 
       navigate("/login");
     } catch (err) {
-      console.error("Registration failed:", err);
-      setError("Failed to complete registration. Please try again.");
+      console.error(
+        "❌ Registration failed:",
+        err.response?.data || err.message
+      );
+      setError(
+        err.response?.data?.message ||
+          "Failed to complete registration. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -92,7 +125,6 @@ export default function WorkerRegistration() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-indigo-900 to-gray-900 px-4">
       <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 animate-fadeIn">
-        {/* Branding */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-teal-400">KaamExpress</h1>
           <p className="text-gray-300 mt-1 text-sm">
@@ -100,49 +132,53 @@ export default function WorkerRegistration() {
           </p>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="text-red-400 bg-red-900/30 border border-red-500 text-sm px-3 py-2 rounded mb-4 text-center">
             {error}
           </div>
         )}
 
-        {/* Form */}
         <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Services Dropdown */}
-          <div className="relative">
-            <label className="block text-sm text-gray-200 mb-1">
-              Select Services
-            </label>
-            <button
-              type="button"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-400 text-left"
-            >
-              {form.selectedServices.length > 0
-                ? `${form.selectedServices.length} service(s) selected`
-                : "Choose services"}
-            </button>
+          {/* ✅ Services dropdown only breaks itself if API fails */}
+          {services.length > 0 ? (
+            <div className="relative">
+              <label className="block text-sm text-gray-200 mb-1">
+                Select Services
+              </label>
+              <button
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-400 text-left"
+              >
+                {form.selectedServices.length > 0
+                  ? `${form.selectedServices.length} service(s) selected`
+                  : "Choose services"}
+              </button>
 
-            {dropdownOpen && (
-              <div className="absolute z-10 mt-2 w-full bg-gray-900 border border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                {services.map((srv) => (
-                  <label
-                    key={srv._id}
-                    className="flex items-center text-gray-300 px-3 py-2 cursor-pointer hover:bg-gray-800"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={form.selectedServices.includes(srv._id)}
-                      onChange={() => toggleService(srv._id)}
-                      className="mr-2"
-                    />
-                    {srv.name}
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
+              {dropdownOpen && (
+                <div className="absolute z-10 mt-2 w-full bg-gray-900 border border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  {services.map((srv) => (
+                    <label
+                      key={srv._id}
+                      className="flex items-center text-gray-300 px-3 py-2 cursor-pointer hover:bg-gray-800"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.selectedServices.includes(srv._id)}
+                        onChange={() => toggleService(srv._id)}
+                        className="mr-2"
+                      />
+                      {srv.name}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-gray-400 text-sm">
+              Services unavailable at the moment.
+            </p>
+          )}
 
           {/* Custom Skills */}
           <div>
@@ -218,7 +254,6 @@ export default function WorkerRegistration() {
             </label>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
