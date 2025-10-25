@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { signup } from "../api/auth"; // <-- must point to your backend API wrapper
+import { signup } from "../api/auth"; 
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -10,7 +10,8 @@ export default function SignupPage() {
     email: "",
     phone: "",
     password: "",
-    role: "customer", // default
+    confirmPassword: "",
+    role: "customer", 
   });
 
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,7 @@ export default function SignupPage() {
       !formData.email ||
       !formData.phone ||
       !formData.password ||
+      !formData.confirmPassword ||
       !formData.role
     ) {
       setError("All fields are required");
@@ -42,6 +44,10 @@ export default function SignupPage() {
     }
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters");
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
       return false;
     }
     if (!/^\+?[0-9]{7,15}$/.test(formData.phone)) {
@@ -61,15 +67,13 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const res = await signup(formData); // sends { name, email, phone, password, role }
-      console.log("Signup success:", res.data);
+      // remove confirmPassword before sending to API
+      const { confirmPassword, ...payload } = formData;
+      const { token, user } = await signup(payload); // sends { name, email, phone, password, role }
 
       // If worker → setup profile, else → go login
-      if (formData.role === "worker") {
-        navigate("/worker-profile-setup", { state: res.data.user });
-      } else {
-        navigate("/login");
-      }
+
+      navigate("/login");
     } catch (err) {
       console.error("Signup error:", err);
       setError(err.response?.data?.error || "Signup failed. Please try again.");
@@ -167,8 +171,27 @@ export default function SignupPage() {
             />
           </div>
 
-          {/* Role */}
+          {/* Confirm Password */}
           <div>
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm text-gray-200 mb-1"
+            >
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              type="password"
+              placeholder="Re-enter your password"
+              required
+            />
+          </div>
+
+          {/* Role */}
+          {/* <div>
             <label htmlFor="role" className="block text-sm text-gray-200 mb-1">
               Role
             </label>
@@ -182,7 +205,7 @@ export default function SignupPage() {
               <option value="customer">Customer</option>
               <option value="worker">Worker</option>
             </select>
-          </div>
+          </div> */}
 
           {/* Submit */}
           <button

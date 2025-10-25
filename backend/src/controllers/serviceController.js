@@ -3,18 +3,60 @@ const Service = require("../models/Service");
 // Create a new service (admin only)
 exports.createService = async (req, res, next) => {
   try {
-    const { name, description, price, category } = req.body;
-    if (!name || !price)
-      return res.status(400).json({ error: "Name and price are required" });
+    const {
+      name,
+      description,
+      categories,
+      priceRange,
+      isActive,
+      imageUrl,
+      duration,
+      features,
+    } = req.body;
+
+    // Basic validation
+    if (!name || !description || !priceRange) {
+      return res
+        .status(400)
+        .json({ error: "Name, description, and price range are required" });
+    }
+
+    // Normalize arrays (handle both array or comma-separated strings)
+    const formattedCategories = Array.isArray(categories)
+      ? categories
+      : typeof categories === "string"
+      ? categories
+          .split(",")
+          .map((c) => c.trim())
+          .filter(Boolean)
+      : [];
+
+    const formattedFeatures = Array.isArray(features)
+      ? features
+      : typeof features === "string"
+      ? features
+          .split(",")
+          .map((f) => f.trim())
+          .filter(Boolean)
+      : [];
 
     const service = await Service.create({
       name,
       description,
-      price,
-      category,
+      categories: formattedCategories,
+      priceRange,
+      isActive: isActive !== undefined ? isActive : true,
+      imageUrl,
+      duration: duration ? parseInt(duration) : 60,
+      features: formattedFeatures,
     });
-    res.status(201).json({ message: "Service created", service });
+
+    res.status(201).json({ message: "Service created successfully", service });
   } catch (err) {
+    // Handle duplicate key error (unique name)
+    if (err.code === 11000) {
+      return res.status(409).json({ error: "Service name already exists" });
+    }
     next(err);
   }
 };
@@ -29,14 +71,40 @@ exports.addMultipleServices = async (req, res, next) => {
         .json({ error: "An array of services is required" });
     }
 
-    const insertedServices = await Service.insertMany(services, {
+    // Normalize categories/features for each service
+    const formattedServices = services.map((s) => ({
+      ...s,
+      categories: Array.isArray(s.categories)
+        ? s.categories
+        : typeof s.categories === "string"
+        ? s.categories
+            .split(",")
+            .map((c) => c.trim())
+            .filter(Boolean)
+        : [],
+      features: Array.isArray(s.features)
+        ? s.features
+        : typeof s.features === "string"
+        ? s.features
+            .split(",")
+            .map((f) => f.trim())
+            .filter(Boolean)
+        : [],
+      duration: s.duration ? parseInt(s.duration) : 60,
+      isActive: s.isActive !== undefined ? s.isActive : true,
+    }));
+
+    const insertedServices = await Service.insertMany(formattedServices, {
       ordered: false,
     });
+
     res
       .status(201)
-      .json({ message: "Services added", services: insertedServices });
+      .json({
+        message: "Services added successfully",
+        services: insertedServices,
+      });
   } catch (err) {
-    // Handle duplicate key errors gracefully
     if (err.code === 11000) {
       return res
         .status(409)
@@ -49,14 +117,14 @@ exports.addMultipleServices = async (req, res, next) => {
 // Get all services (public)
 exports.getAllServices = async (req, res, next) => {
   try {
-    const services = await Service.find();
+    const services = await Service.find().sort({ createdAt: -1 });
     res.json(services);
   } catch (err) {
     next(err);
   }
 };
 
-// Get service by ID (public)
+// Get a single service by ID (public)
 exports.getServiceById = async (req, res, next) => {
   try {
     const service = await Service.findById(req.params.id);
@@ -67,25 +135,75 @@ exports.getServiceById = async (req, res, next) => {
   }
 };
 
-// Update service (admin only)
+// Update a service (admin only)
 exports.updateService = async (req, res, next) => {
   try {
-    const service = await Service.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+    const {
+      name,
+      description,
+      categories,
+      priceRange,
+      isActive,
+      imageUrl,
+      duration,
+      features,
+    } = req.body;
+
+    // Normalize arrays
+    const formattedCategories = Array.isArray(categories)
+      ? categories
+      : typeof categories === "string"
+      ? categories
+          .split(",")
+          .map((c) => c.trim())
+          .filter(Boolean)
+      : [];
+
+    const formattedFeatures = Array.isArray(features)
+      ? features
+      : typeof features === "string"
+      ? features
+          .split(",")
+          .map((f) => f.trim())
+          .filter(Boolean)
+      : [];
+
+    const updatedService = await Service.findByIdAndUpdate(
+      req.params.id,
+      {
+        name,
+        description,
+        categories: formattedCategories,
+        priceRange,
+        isActive,
+        imageUrl,
+        duration: duration ? parseInt(duration) : 60,
+        features: formattedFeatures,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedService)
+      return res.status(404).json({ error: "Service not found" });
+
+    res.json({
+      message: "Service updated successfully",
+      service: updatedService,
     });
-    if (!service) return res.status(404).json({ error: "Service not found" });
-    res.json({ message: "Service updated", service });
   } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ error: "Service name already exists" });
+    }
     next(err);
   }
 };
 
-// Delete service (admin only)
+// Delete a service (admin only)
 exports.deleteService = async (req, res, next) => {
   try {
     const service = await Service.findByIdAndDelete(req.params.id);
     if (!service) return res.status(404).json({ error: "Service not found" });
-    res.json({ message: "Service deleted" });
+    res.json({ message: "Service deleted successfully" });
   } catch (err) {
     next(err);
   }

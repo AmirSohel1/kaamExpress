@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createBooking } from "../../../api/bookings";
-import { createPayment } from "../../../api/payments";
 import {
   MapPinIcon,
   CalendarIcon,
@@ -428,7 +427,7 @@ const BookingForm = ({ worker, service, onSuccess, onError }) => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <CurrencyDollarIcon className="h-5 w-5 text-gray-400" />
+                    {/* <CurrencyDollarIcon className="h-5 w-5 text-gray-400" /> */}
                   </div>
                   <input
                     id="price"
@@ -455,15 +454,22 @@ const BookingForm = ({ worker, service, onSuccess, onError }) => {
                   id="method"
                   value={form.method}
                   onChange={(e) => handleChange("method", e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  className="w-full px-4 py-2 border bg-blue-600 border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 >
-                  {["Cash", "Card", "UPI", "NetBanking", "Wallet", "Other"].map(
+                  {["Cash"].map(
                     (method) => (
                       <option key={method} value={method}>
                         {method}
                       </option>
                     )
                   )}
+                  {/* {["Cash", "Card", "UPI", "NetBanking", "Wallet", "Other"].map(
+                    (method) => (
+                      <option key={method} value={method}>
+                        {method}
+                      </option>
+                    )
+                  )} */}
                 </select>
               </div>
 

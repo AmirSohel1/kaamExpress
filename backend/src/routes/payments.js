@@ -37,7 +37,7 @@ router.get(
 // Create a payment (customers initiate, admin can also create manually if needed)
 router.post(
   "/:bookingId",
-  auth(["customer", "admin"]),
+  auth(["customer", "worker", "admin"]),
   paymentController.createPayment
 );
 

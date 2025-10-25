@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-
+const Customer = require("../models/Customer");
 // =========================
 // 🔑 Token Helper
 // =========================
@@ -116,7 +116,16 @@ exports.resetPassword = async (req, res, next) => {
 exports.me = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
-    res.json(user);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    let extra = {};
+    if (user.role === "customer") {
+      const customer = await Customer.findOne({ user: req.user.id });
+      extra.customer = !!customer; // true if found, false otherwise
+    }
+    console.log(extra);
+
+    res.json({ ...user.toObject(), ...extra });
   } catch (err) {
     next(err);
   }
@@ -232,6 +241,50 @@ exports.adminDeactivateUser = async (req, res, next) => {
     next(err);
   }
 };
+
+//update all the user password
+exports.adminUpdateAllUserPasswords = async (req, res, next) => {
+  try {
+    const newPassword = "Amir@123";
+    if (!newPassword) {
+      return res.status(400).json({ error: "New password is required" });
+    }
+
+    const users = await User.find();
+    for (const user of users) {
+      user.password = newPassword;
+      await user.save();
+    }
+
+    res.json({ message: "All user passwords updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// async function updateAllUserPasswordss() {
+//   // This function is intentionally left blank as the logic is implemented in the controller above.
+
+//   try {
+//     const newPassword = "Amir@123";
+//     if (!newPassword) {
+//       console.log("New password is required");
+//       return;
+//     }
+
+//     const users = await User.find();
+//     for (const user of users) {
+//       user.password = newPassword;
+//       await user.save();
+//     }
+
+//     console.log("All user passwords updated successfully");
+//     return;
+//   } catch (err) {
+//     next(err);
+//   }
+// }
+// updateAllUserPasswordss();
 
 // Reactivate user
 exports.adminReactivateUser = async (req, res, next) => {

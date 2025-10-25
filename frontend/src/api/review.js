@@ -7,7 +7,7 @@ export const fetchReviewsByWorker = async (workerId) => {
 };
 export const fetchReviews = async () => {
   const res = await api.get("/review/all");
-  console.log(res.data);
+  // console.log(res.data);
   return res.data;
 };
 export const createReview = async (data) => {

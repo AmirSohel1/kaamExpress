@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaStar } from "react-icons/fa";
 import clsx from "clsx";
+import { verifyWorker,RejectWorker } from "../../../api/workerProfile";
 
 const WorkerTable = ({ workers = [], onRowClick, onStatus }) => {
   const getAverageRating = (ratings) => {
@@ -9,6 +10,25 @@ const WorkerTable = ({ workers = [], onRowClick, onStatus }) => {
     return (total / ratings.length).toFixed(1);
   };
 
+  const handleVerify = async (workerId) => {
+    try {
+      await verifyWorker(workerId);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error verifying worker:", error);
+    }
+  };
+
+  const handleReject = async (workerId) => {
+    try {
+      await RejectWorker(workerId);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error rejecting worker:", error);
+    }
+  };
+
+  
   return (
     <div className="overflow-x-auto rounded-2xl shadow bg-[var(--card)] border border-[var(--accent)]/10 animate-fade-in-up">
       <table className="min-w-full divide-y divide-gray-700">
@@ -32,6 +52,9 @@ const WorkerTable = ({ workers = [], onRowClick, onStatus }) => {
             <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
               Joined
             </th>
+            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Verify
+            </th>
             <th className="px-4 py-3"></th>
           </tr>
         </thead>
@@ -52,14 +75,14 @@ const WorkerTable = ({ workers = [], onRowClick, onStatus }) => {
                 <span
                   className={clsx(
                     "px-2 py-1 rounded-full text-xs font-semibold",
-                    w.status === "Approved"
+                    w.verified == true
                       ? "bg-green-900 text-green-300"
-                      : w.status === "Pending"
+                      : w.verified === "Pending"
                       ? "bg-yellow-900 text-yellow-300"
                       : "bg-red-900 text-red-300"
                   )}
                 >
-                  {w.status || "Pending"}
+                  {w.verified == true ? "Verified" : "Pending"}
                 </span>
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-white">
@@ -80,15 +103,15 @@ const WorkerTable = ({ workers = [], onRowClick, onStatus }) => {
               >
                 <button
                   className="px-2 py-1 rounded bg-green-700 text-white font-semibold hover:bg-green-600 disabled:opacity-50 text-xs"
-                  disabled={w.status === "Approved"}
-                  onClick={() => onStatus(w._id, "Approved")}
+                  disabled={w.verified === true}
+                  onClick={() => handleVerify(w._id)}
                 >
                   Approve
                 </button>
                 <button
                   className="px-2 py-1 rounded bg-red-700 text-white font-semibold hover:bg-red-600 disabled:opacity-50 text-xs"
-                  disabled={w.status === "Rejected"}
-                  onClick={() => onStatus(w._id, "Rejected")}
+                  disabled={w.verified === false}
+                  onClick={() => handleReject(w._id)}
                 >
                   Reject
                 </button>

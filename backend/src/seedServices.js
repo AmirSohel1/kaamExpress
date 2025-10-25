@@ -98,7 +98,10 @@ const customerServices = [
 
 const start = async () => {
   try {
-    await mongoose.connect("mongodb://127.0.0.1:27017/kaamexpress");
+    // await mongoose.connect("mongodb://127.0.0.1:27017/kaamexpress");
+    await mongoose.connect(
+      "mongodb+srv://amir:PUeSosXlRtrAHruJ@cluster0.8rfemqv.mongodb.net/?retryWrites=true&w=majority&appName=kaamexpress"
+    );
     console.log("MongoDB connected");
 
     await Service.deleteMany({});

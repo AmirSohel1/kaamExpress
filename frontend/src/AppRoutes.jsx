@@ -44,7 +44,7 @@ import AdminServices from "./pages/admin/Services";
 import LandingPage from "./pages/LandingHome/LandingPage";
 import Signup from "./pages/Signup";
 import Header from "./pages/LandingHome/components/Header";
-import Footer from "./pages/LandingHome/components/Footer";
+import Footer from "./components/Footer";
 import MakePayment from "./components/MakePayment";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 

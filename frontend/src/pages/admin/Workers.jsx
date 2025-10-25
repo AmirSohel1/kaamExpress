@@ -30,6 +30,7 @@ const Workers = () => {
       try {
         const res = await fetchWorkers();
         // Safely ensure workers is an array
+        // console.log(res);
         setWorkers(Array.isArray(res.workers) ? res.workers : []);
       } catch (err) {
         if (err.response && err.response.status === 401) {
@@ -58,8 +59,10 @@ const Workers = () => {
     : [];
 
   const handleRowClick = (worker) => {
-    setSelectedWorker(worker);
-    setModalOpen(true);
+    if (worker) {
+      setSelectedWorker(worker);
+      setModalOpen(true);
+    }
   };
 
   const handleCloseModal = () => {
@@ -131,15 +134,22 @@ const Workers = () => {
       </div>
 
       {/* Table for larger screens */}
-      <WorkerTable
-        workers={filtered}
-        onRowClick={handleRowClick}
-        onStatus={handleStatus}
-      />
+      <div className="hidden md:block">
+        <WorkerTable
+          workers={filtered}
+          onRowClick={handleRowClick}
+          onStatus={handleStatus}
+        />
+        {filtered.length === 0 && (
+          <div className="text-center text-gray-400 py-8">
+            No workers found.
+          </div>
+        )}
+      </div>
 
       <WorkerInfoModal
         worker={selectedWorker}
-        open={modalOpen}
+        open={modalOpen && selectedWorker}
         onClose={handleCloseModal}
       />
 

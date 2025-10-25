@@ -6,7 +6,7 @@ const auth = require("../middleware/auth");
 router.get("/user/:userId", customerController.getCustomerByUserId);
 
 // Admin only
-router.get("/", auth("admin"), customerController.getAllCustomers);
+router.get("/", auth(["admin"]), customerController.getAllCustomers);
 
 router.get(
   "/:id",

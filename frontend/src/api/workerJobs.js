@@ -3,7 +3,7 @@ import api from "./api";
 // Get all jobs assigned to the current worker
 export async function getWorkerJobs() {
   const res = await api.get("/bookings");
-  console.log("Fetched jobs:", res.data); // Debug log
+  // console.log("Fetched jobs:", res.data); // Debug log
   return res.data.bookings || [];
 }
 

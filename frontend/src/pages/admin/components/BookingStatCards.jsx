@@ -1,50 +1,103 @@
 import React from "react";
+import {
+  FaRupeeSign,
+  FaExclamationTriangle,
+  FaMoneyBillWave,
+} from "react-icons/fa";
 
-const BookingStatCards = ({ bookings = [], totalRevenue = 0 }) => {
+const BookingStatCards = ({
+  bookings = [],
+  totalRevenue = 0,
+  paidRevenue = 0,
+  unpaidBookings = 0,
+}) => {
   const stats = [
     {
       label: "Total Bookings",
       value: bookings.length,
-      color: "text-[var(--accent)]",
+      color: "text-blue-400",
+      icon: "📊",
+      trend: "+12%",
     },
     {
       label: "Completed",
       value: bookings.filter((b) => b.status === "completed").length,
       color: "text-green-400",
+      icon: "✅",
+      percentage:
+        (
+          (bookings.filter((b) => b.status === "completed").length /
+            bookings.length) *
+          100
+        ).toFixed(1) + "%",
     },
     {
       label: "In Progress",
       value: bookings.filter((b) => b.status === "in-progress").length,
-      color: "text-blue-300",
+      color: "text-yellow-400",
+      icon: "🔄",
     },
     {
-      label: "Disputes",
-      value: bookings.filter((b) => b.status === "dispute").length,
-      color: "text-red-400",
+      label: "Pending",
+      value: bookings.filter((b) => b.status === "pending").length,
+      color: "text-orange-400",
+      icon: "⏳",
     },
     {
       label: "Total Revenue",
       value: `₹${Number(totalRevenue).toLocaleString()}`,
-      color: "text-pink-300",
+      color: "text-purple-400",
+      icon: <FaRupeeSign className="inline" />,
+      subValue: `₹${Number(paidRevenue).toLocaleString()} paid`,
+    },
+    {
+      label: "Unpaid Bookings",
+      value: unpaidBookings,
+      color: "text-red-400",
+      icon: <FaExclamationTriangle className="inline" />,
+      alert: unpaidBookings > 0,
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 animate-fade-in-up">
+    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
       {stats.map((card, i) => (
         <div
           key={i}
-          className="rounded-xl p-4 sm:p-6 bg-[var(--secondary)] flex flex-col items-center justify-center shadow border border-[var(--accent)]/10 animate-fade-in-up"
-          style={{ animationDelay: `${i * 0.1 + 0.2}s` }}
+          className="rounded-2xl p-4 bg-gradient-to-br from-[var(--secondary)] to-[var(--card)] border border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group"
         >
-          <div
-            className={`text-2xl font-bold ${card.color} animate-pulse-slow`}
-          >
+          <div className="flex items-center justify-between mb-3">
+            <div
+              className={`text-2xl ${card.color} group-hover:scale-110 transition-transform`}
+            >
+              {card.icon}
+            </div>
+            {card.alert && (
+              <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+            )}
+          </div>
+
+          <div className={`text-2xl font-bold ${card.color} mb-1`}>
             {card.value}
           </div>
-          <div className="text-gray-400 text-sm mt-1 text-center">
-            {card.label}
+
+          <div className="text-gray-400 text-sm flex justify-between items-end">
+            <span>{card.label}</span>
+            {card.percentage && (
+              <span className="text-green-400 text-xs font-semibold">
+                {card.percentage}
+              </span>
+            )}
+            {card.trend && (
+              <span className="text-blue-400 text-xs font-semibold">
+                {card.trend}
+              </span>
+            )}
           </div>
+
+          {card.subValue && (
+            <div className="text-gray-500 text-xs mt-2">{card.subValue}</div>
+          )}
         </div>
       ))}
     </div>

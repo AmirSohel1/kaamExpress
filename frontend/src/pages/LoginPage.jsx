@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext.jsx";
 import { login as apiLogin } from "../api/auth";
 import { useNavigate, Link } from "react-router-dom";
-
 export default function LoginPage() {
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
@@ -15,12 +14,15 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     try {
-      const data = await apiLogin(email, password, role);
+      const data = await apiLogin(email, password);
       login(data);
 
       if (data.user.role === "admin") navigate("/admin");
-      else if (data.user.role === "customer") navigate("/customer");
-      else if (data.user.role === "worker") navigate("/worker");
+      else if (data.user.role === "customer") {
+        navigate("/customer");
+      } else if (data.user.role === "worker") {
+        navigate("/worker");
+      }
     } catch (err) {
       setError("Invalid credentials");
     }
@@ -95,7 +97,7 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
-
+        {/* Forgot password link */}
         <div className="mt-4 text-center text-sm text-gray-400">
           <Link
             to="/forgot-password"

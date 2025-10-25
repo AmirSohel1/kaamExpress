@@ -139,31 +139,6 @@ const History = () => {
     }
   };
 
-  const handleExport = () => {
-    const csv = [
-      ["Service", "Worker", "Date", "Rating", "Review"],
-      ...filteredReviews.map((r) => [
-        r.service,
-        r.worker,
-        r.date,
-        r.rating,
-        r.review,
-      ]),
-    ]
-      .map((row) => `"${row.join('","')}"`)
-      .join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `service_history_${
-      new Date().toISOString().split("T")[0]
-    }.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const handleSort = (field) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -280,13 +255,6 @@ const History = () => {
             </select>
           </div>
         </div>
-
-        <button
-          onClick={handleExport}
-          className="px-4 py-2.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-black font-semibold transition flex items-center gap-2 shadow-md"
-        >
-          <FaFileExport /> Export
-        </button>
       </div>
 
       {/* Results Count */}

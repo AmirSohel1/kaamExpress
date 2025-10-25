@@ -3,7 +3,7 @@ import api from "./api";
 
 export const fetchPayments = async () => {
   const res = await api.get("/payments/");
-  console.log("Response from /payments:", res.data);
+  // console.log("Response from /payments:", res.data);
   // console.log("Response from /payments/admin:", res.data);
   return res.data;
 };
@@ -20,6 +20,7 @@ export const createPayment = async (id, data) => {
 
 export const updatePayment = async (id, data) => {
   const res = await api.put(`/payments/${id}`, data);
+  console.log(res.data);
   return res.data;
 };
 

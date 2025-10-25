@@ -7,7 +7,10 @@ yarn-error.log*
 # Env files
 *.env
 backend/.github/
+backend/src/seedServices.js
+backend/src/seedWorker.js
 # Build outputs
+
 backend/dist/
 frontend/dist/
 frontend/build/

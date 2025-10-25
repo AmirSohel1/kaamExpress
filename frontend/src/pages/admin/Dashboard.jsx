@@ -8,7 +8,8 @@ import {
   FaChartBar,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import WorkerApprovalModal from "../../components/WorkerApprovalModal";
+// import WorkerApprovalModal from "../../components/worker/WorkerApprovalModal";
+import WorkerApprovalModal from "../../components/worker/WorkerApprovalModal";
 import AdminStatCards from "./components/AdminStatCards";
 import AdminRecentActivities from "./components/AdminRecentActivities";
 import AdminPendingApprovals from "./components/AdminPendingApprovals";

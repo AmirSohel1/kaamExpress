@@ -98,6 +98,7 @@ exports.createPayment = async (req, res, next) => {
       customer: bookingData.customer,
       worker: bookingData.worker,
       createdBy: user.id,
+      status: "Paid",
     });
 
     // ----------------- 🔔 Notifications ----------------- //
@@ -128,6 +129,7 @@ exports.createPayment = async (req, res, next) => {
     await Booking.findByIdAndUpdate(booking, {
       isPaid: true,
     });
+
     // console.log("Updated Booking isPaid:", updateIsPaid);
 
     res.status(201).json({ message: "Payment created", payment });

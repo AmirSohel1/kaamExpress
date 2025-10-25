@@ -53,7 +53,7 @@ const Bookings = () => {
       try {
         setLoading(true);
         const data = await fetchBookings();
-        console.log(data);
+        // console.log(data);
         setBookings(data.bookings);
       } catch (err) {
         console.error("Failed to fetch bookings:", err);
@@ -104,40 +104,6 @@ const Bookings = () => {
     return matchesFilter && matchesSearch;
   });
 
-  const exportToCSV = () => {
-    const csv = [
-      [
-        "Service",
-        "Worker",
-        "Date",
-        "Time",
-        "Location",
-        "Status",
-        "Payment Status",
-        "Amount",
-      ],
-      ...bookings.map((b) => [
-        b.service?.name || "N/A",
-        b.worker?.name || "Unassigned",
-        formatDate(b.date),
-        b.time,
-        formatAddress(b.location),
-        b.status,
-        b.paymentStatus,
-        `$${b.finalAmount}`,
-      ]),
-    ]
-      .map((row) => `"${row.join('","')}"`)
-      .join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "customer_bookings.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   if (loading) {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
@@ -158,13 +124,6 @@ const Bookings = () => {
             Manage your active service bookings
           </p>
         </div>
-        <button
-          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-dark)] text-white font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 shadow-md"
-          onClick={exportToCSV}
-        >
-          <FaDownload className="text-sm" />
-          Export Bookings
-        </button>
       </div>
 
       {/* Filters and Search */}
@@ -440,7 +399,7 @@ const Bookings = () => {
                         "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                       }`}
                     >
-                      {b.paymentStatus}
+                      {b.isPaid ? "Paid" : "Unpaid"}
                     </span>
                   </td>
                   <td className="py-5 px-6">

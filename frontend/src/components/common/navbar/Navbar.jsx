@@ -1,62 +1,61 @@
 // Navbar.js (Fixed and Enhanced)
 import React, { useState, useContext, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import ProfileDropdown from "./ProfileDropdown";
-import NavbarNotifications from "./NavbarNotifications";
-import NavbarProfileButton from "./NavbarProfileButton";
+import ProfileDropdown from "../profile/ProfileDropdown";
+import NavbarProfileButton from "../profile/NavbarProfileButton";
 import { FaSearch, FaBell, FaCog } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../contexts/AuthContext.jsx";
-import NotificationDropdown from "./NotificationDropdown";
-import ProfileSettingsModal from "./ProfileSettingsModal";
-import HelpSupportModal from "./HelpSupportModal";
-import { me } from "../api/auth.js";
-import UpdatePasswordModal from "./UpdatePasswordModal.jsx";
+import { AuthContext } from "../../../contexts/AuthContext.jsx";
+import NotificationDropdown from "../notification/NotificationDropdown";
+import ProfileSettingsModal from "../profile/ProfileSettingsModal";
+import HelpSupportModal from "../setting/HelpSupportModal";
+import { me } from "../../../api/auth.js";
+import UpdatePasswordModal from "../../UpdatePasswordModal.jsx";
 
-const Notifications = {
-  customer: [
-    {
-      id: 1,
-      text: "Your booking #1234 is confirmed.",
-      read: false,
-      time: "2 mins ago",
-    },
-    {
-      id: 2,
-      text: "Payment of ₹500 received.",
-      read: true,
-      time: "1 hour ago",
-    },
-  ],
-  worker: [
-    {
-      id: 1,
-      text: "New job assigned: 'Fix bugs in project'",
-      read: false,
-      time: "10 mins ago",
-    },
-    {
-      id: 2,
-      text: "Your profile has been updated.",
-      read: true,
-      time: "2 days ago",
-    },
-  ],
-  admin: [
-    {
-      id: 1,
-      text: "New user registered: John Doe",
-      read: false,
-      time: "5 mins ago",
-    },
-    {
-      id: 2,
-      text: "Server maintenance scheduled for midnight",
-      read: true,
-      time: "Yesterday",
-    },
-  ],
-};
+// const Notifications = {
+//   customer: [
+//     {
+//       id: 1,
+//       text: "Your booking #1234 is confirmed.",
+//       read: false,
+//       time: "2 mins ago",
+//     },
+//     {
+//       id: 2,
+//       text: "Payment of ₹500 received.",
+//       read: true,
+//       time: "1 hour ago",
+//     },
+//   ],
+//   worker: [
+//     {
+//       id: 1,
+//       text: "New job assigned: 'Fix bugs in project'",
+//       read: false,
+//       time: "10 mins ago",
+//     },
+//     {
+//       id: 2,
+//       text: "Your profile has been updated.",
+//       read: true,
+//       time: "2 days ago",
+//     },
+//   ],
+//   admin: [
+//     {
+//       id: 1,
+//       text: "New user registered: John Doe",
+//       read: false,
+//       time: "5 mins ago",
+//     },
+//     {
+//       id: 2,
+//       text: "Server maintenance scheduled for midnight",
+//       read: true,
+//       time: "Yesterday",
+//     },
+//   ],
+// };
 
 const pageTitles = [
   { path: "/customer", title: "Find Services" },
@@ -166,8 +165,8 @@ const Navbar = ({ onMenuClick }) => {
     fetchMyProfile();
   }, [user]);
 
-  const notifList = Notifications[user.role] || [];
-  const unreadCount = notifList.filter((n) => !n.read).length;
+  // const notifList = Notifications[user.role] || [];
+  // const unreadCount = notifList.filter((n) => !n.read).length;
 
   // Handle dropdown toggle & position
   const handleProfileClick = () => {
@@ -245,7 +244,7 @@ const Navbar = ({ onMenuClick }) => {
             isSearchFocused ? "flex-1 mx-4" : "hidden sm:block flex-shrink"
           }`}
         >
-          <form onSubmit={handleSearch} className="relative">
+          {/* <form onSubmit={handleSearch} className="relative">
             <input
               type="text"
               placeholder="Search services, workers..."
@@ -263,7 +262,7 @@ const Navbar = ({ onMenuClick }) => {
             >
               <FaSearch className="text-sm" />
             </button>
-          </form>
+          </form> */}
 
           {/* Mobile search close button */}
           {isSearchFocused && window.innerWidth < 640 && (
@@ -278,17 +277,8 @@ const Navbar = ({ onMenuClick }) => {
 
         {/* Right side actions */}
         <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 min-w-fit">
-          {/* Settings button */}
-          <button
-            className="p-2 rounded-lg hover:bg-secondary/50 transition-colors duration-300 text-gray-300 hover:text-white"
-            onClick={() => navigate("/settings")}
-            aria-label="Settings"
-          >
-            <FaCog className="text-lg" />
-          </button>
-
           {/* Notifications */}
-          <div ref={notifRef} className="relative">
+          {/* <div ref={notifRef} className="relative">
             <button
               onClick={handleNotifClick}
               className="p-2 rounded-lg hover:bg-secondary/50 transition-colors duration-300 relative"
@@ -302,7 +292,7 @@ const Navbar = ({ onMenuClick }) => {
               )}
             </button>
 
-            {/* Notification dropdown portal */}
+            Notification dropdown portal
             {showNotif &&
               createPortal(
                 <div
@@ -321,7 +311,7 @@ const Navbar = ({ onMenuClick }) => {
                 </div>,
                 document.body
               )}
-          </div>
+          </div> */}
 
           {/* Profile Button */}
           <NavbarProfileButton

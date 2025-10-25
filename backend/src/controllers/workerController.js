@@ -1,7 +1,7 @@
 const Worker = require("../models/Worker");
 const User = require("../models/User");
 const Service = require("../models/Service");
-
+const mongoose = require("mongoose");
 // =======================
 // Update worker
 // =======================
@@ -55,7 +55,7 @@ exports.getMyProfile = async (req, res, next) => {
 exports.createWorker = async (req, res, next) => {
   try {
     const {
-      user,
+      userID,
       services,
       customSkills,
       experience,
@@ -63,12 +63,12 @@ exports.createWorker = async (req, res, next) => {
       availability,
     } = req.body;
 
-    const existingUser = await User.findById(user);
+    const existingUser = await User.findById(userID);
     if (!existingUser || existingUser.role !== "worker") {
       return res.status(400).json({ error: "User not found or not a worker" });
     }
 
-    const existingWorker = await Worker.findOne({ user });
+    const existingWorker = await Worker.findOne({ userID });
     if (existingWorker) {
       return res.status(400).json({ error: "Worker profile already exists" });
     }
@@ -83,7 +83,7 @@ exports.createWorker = async (req, res, next) => {
     }
 
     const worker = await Worker.create({
-      user,
+      user: userID,
       services,
       customSkills,
       experience,
@@ -255,6 +255,81 @@ exports.getWorkersByServiceId = async (req, res, next) => {
       },
       workers,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// =======================
+// verify worker (Admin only)
+// =======================
+exports.verifyWorker = async (req, res, next) => {
+  try {
+    // Use the workerId from request body
+    const { workerId } = req.params;
+
+    // Example hardcoded workerId as string (for testing only)
+    // const workerId = "68f333c6568cec815d6ce7c6";
+    console.log(workerId);
+
+    // Validate workerId
+    if (!workerId || !mongoose.Types.ObjectId.isValid(workerId)) {
+      return res.status(400).json({ error: "Invalid or missing workerId" });
+    }
+
+    // Find the worker by ID
+    const worker = await Worker.findById(workerId);
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+
+    // Check if already verified
+    if (worker.verified) {
+      return res
+        .status(200)
+        .json({ message: "Worker already verified", worker });
+    }
+
+    // Verify the worker
+    worker.verified = true;
+    await worker.save();
+
+    res.json({ message: "Worker verified successfully", worker });
+  } catch (err) {
+    next(err);
+  }
+};
+// =======================
+// reject worker (Admin only)
+// =======================
+exports.rejectWorker = async (req, res, next) => {
+  try {
+    // Use the workerId from request body
+    const { workerId } = req.params;
+
+    // Example hardcoded workerId as string (for testing only)
+    // const workerId = "68f333c6568cec815d6ce7c6";
+    // console.log(workerId);
+
+    // Validate workerId
+    if (!workerId || !mongoose.Types.ObjectId.isValid(workerId)) {
+      return res.status(400).json({ error: "Invalid or missing workerId" });
+    }
+
+    // Find the worker by ID
+    const worker = await Worker.findById(workerId);
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+
+    // Check if already verified
+    if (worker.verified === false) {
+      return res
+        .status(200)
+        .json({ message: "Worker already not verified verified", worker });
+    }
+
+    // Verify the worker
+    worker.verified = false;
+    await worker.save();
+
+    res.json({ message: "Worker rejected successfully", worker });
   } catch (err) {
     next(err);
   }

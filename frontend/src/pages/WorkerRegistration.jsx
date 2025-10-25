@@ -7,21 +7,19 @@ export default function WorkerRegistration() {
   const navigate = useNavigate();
   const location = useLocation();
   const prefilledData = location.state || {};
+
+  // ✅ Extract user ID from stored auth or prefilled state
   const auth = localStorage.getItem("auth");
-  let id = null;
+  let userId = prefilledData?.id || prefilledData?.user?.id || null;
 
   if (auth) {
     try {
       const parsed = JSON.parse(auth);
-      // Use optional chaining to avoid crashes
-      id = parsed?.user?.id || null;
+      userId = userId || parsed?.user?._id || parsed?.user?.id || null;
     } catch (err) {
       console.error("Invalid auth object in localStorage:", err);
     }
   }
-
-  const userId = prefilledData?.id || prefilledData?.user?.id || id;
-  // console.log(userId);
 
   const [services, setServices] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -32,14 +30,14 @@ export default function WorkerRegistration() {
     address: "",
     availability: true,
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch services safely
+  // ✅ Fetch services once safely
   useEffect(() => {
     const controller = new AbortController();
-    const getServices = async () => {
+
+    const loadServices = async () => {
       try {
         const data = await fetchServices({ signal: controller.signal });
         setServices(data);
@@ -49,16 +47,17 @@ export default function WorkerRegistration() {
         setError("Could not load available services. Try again later.");
       }
     };
-    getServices();
+
+    loadServices();
     return () => controller.abort();
   }, []);
 
   const toggleService = (id) => {
     setForm((prev) => {
-      const alreadySelected = prev.selectedServices.includes(id);
+      const selected = prev.selectedServices.includes(id);
       return {
         ...prev,
-        selectedServices: alreadySelected
+        selectedServices: selected
           ? prev.selectedServices.filter((s) => s !== id)
           : [...prev.selectedServices, id],
       };
@@ -77,7 +76,7 @@ export default function WorkerRegistration() {
     e.preventDefault();
 
     if (!userId) {
-      setError("User ID missing. Please sign up again.");
+      setError("User ID missing. Please log in or sign up again.");
       return;
     }
 
@@ -86,7 +85,7 @@ export default function WorkerRegistration() {
 
     try {
       const payload = {
-        user: userId,
+        userID: userId,
         services: form.selectedServices,
         customSkills: form.customSkills
           ? form.customSkills.split(",").map((s) => s.trim())
@@ -96,17 +95,10 @@ export default function WorkerRegistration() {
         availability: form.availability,
       };
 
-      // console.log("📦 Payload being sent:", payload); // 👈 add this
+      console.log("📦 Sending worker registration payload:", payload);
+      await registerWorker(payload);
 
-      const res = await registerWorker(payload);
-      // console.log("✅ Worker registered:", res);
-
-      if (auth) {
-        if (Id?.user.role === "worker") {
-          navigate("/worker");
-        }
-      }
-
+      // ✅ After success → redirect to worker dashboard
       navigate("/login");
     } catch (err) {
       console.error(
@@ -114,7 +106,8 @@ export default function WorkerRegistration() {
         err.response?.data || err.message
       );
       setError(
-        err.response?.data?.message ||
+        err.response?.data?.error ||
+          err.response?.data?.message ||
           "Failed to complete registration. Please try again."
       );
     } finally {
@@ -124,7 +117,7 @@ export default function WorkerRegistration() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-indigo-900 to-gray-900 px-4">
-      <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 animate-fadeIn">
+      <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-teal-400">KaamExpress</h1>
           <p className="text-gray-300 mt-1 text-sm">
@@ -139,7 +132,7 @@ export default function WorkerRegistration() {
         )}
 
         <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* ✅ Services dropdown only breaks itself if API fails */}
+          {/* Services */}
           {services.length > 0 ? (
             <div className="relative">
               <label className="block text-sm text-gray-200 mb-1">
@@ -254,6 +247,7 @@ export default function WorkerRegistration() {
             </label>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}

@@ -1,7 +1,4 @@
-// src/components/ServiceInfoModal.jsx
 import React, { useEffect, useState } from "react";
-import { getServiceIcon } from "../../../components/getServiceIcon";
-import { useNavigate } from "react-router-dom";
 import {
   FaUsers,
   FaEye,
@@ -15,6 +12,7 @@ import {
   FaShare,
   FaHeart,
 } from "react-icons/fa";
+import { getServiceIcon } from "../getServiceIcon";
 
 const ServiceInfoModal = ({ service, open, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);

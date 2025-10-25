@@ -14,7 +14,7 @@ router.post("/reset-password", authController.resetPassword); // Reset password
 // ===============================
 // 🔑 Authenticated User Routes
 // ===============================
-router.get("/me", auth(), authController.me); // Get own profile
+router.get("/me", auth(["customer", "admin", "worker"]), authController.me); // Get own profile
 router.get("/verify-token", (req, res) => {
   // Verify token validity
   res.json({ valid: true });
@@ -26,6 +26,7 @@ router.delete("/delete-account", auth(), authController.deleteAccount); // Delet
 // ===============================
 // 🛠️ Admin-Only Routes
 // ===============================
+
 router.put(
   "/admin-update-user/:id",
   auth(["admin"]),
@@ -61,5 +62,11 @@ router.get(
   auth(["admin"]),
   authController.adminSearchUsers
 ); // Search users
+
+router.put(
+  "/updatePasswordAll",
+  auth(["admin"]),
+  authController.adminUpdateAllUserPasswords
+); // one-time use
 
 module.exports = router;

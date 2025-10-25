@@ -8,7 +8,7 @@ export const fetchWorkerProfilePublic = async (workerId) => {
 
 export const fetchWorkers = async () => {
   const res = await api.get("/workers");
-  // console.log(res.data);
+  console.log(res.data);
   return res.data;
 };
 export const registerWorker = async (data) => {

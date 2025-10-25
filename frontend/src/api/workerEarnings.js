@@ -13,7 +13,7 @@ export async function getWorkerEarnings() {
     const res = await api.get("/bookings");
     const bookings = res.data.bookings;
     // Filter out invalid bookings
-    console.log("Fetched bookings:", bookings);
+    // console.log("Fetched bookings:", bookings);
     return bookings;
   } catch (error) {
     console.error("Error fetching worker earnings:", error);

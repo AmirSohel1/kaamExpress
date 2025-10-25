@@ -1,7 +1,7 @@
 // src/pages/Homepage.jsx
 import React, { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import ServicesGrid from "../../components/ServicesGrid";
+import ServicesGrid from "../../components/service/ServicesGrid";
 import api from "../../api/api";
 
 const Homepage = () => {

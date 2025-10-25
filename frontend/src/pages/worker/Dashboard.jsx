@@ -24,6 +24,7 @@ import { getWorkerProfile } from "../../api/workerProfile";
 import { getWorkerJobs } from "../../api/workerJobs";
 import { getWorkerEarnings } from "../../api/workerEarnings";
 import { getWorkerRatings } from "../../api/workerRatings";
+import { me } from "../../api/auth";
 
 const StatCard = ({ icon, value, label, trend, loading, currency = "₹" }) => {
   const getIcon = () => {
@@ -110,11 +111,12 @@ const WorkerDashboard = () => {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Dashboard loading error:", err);
+        console.error("Dashboard error:", err);
+        navigate("/worker-profile-setup");
         setError("Failed to load dashboard data. Please try again.");
         setLoading(false);
       });
-  }, []);
+  }, [navigate]);
 
   // Calculate stats with trends (simulated)
   const stats = useMemo(() => {

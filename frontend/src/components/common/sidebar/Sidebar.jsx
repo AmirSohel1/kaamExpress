@@ -3,7 +3,7 @@ import React from "react";
 import { FaSignOutAlt } from "react-icons/fa";
 import Avatar from "react-avatar";
 import { useNavigate, useLocation } from "react-router-dom";
-import { AuthContext } from "../contexts/AuthContext";
+import { AuthContext } from "../../../contexts/AuthContext";
 import { useContext } from "react";
 
 const Sidebar = ({ onClose }) => {
@@ -114,12 +114,12 @@ const Sidebar = ({ onClose }) => {
             </div>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-2">
             <div className="flex items-center bg-secondary/50 rounded-xl px-4 py-2 text-sm font-medium text-accent-light">
               <span className="flex-1">{role}</span>
-              <span className="bg-accent/20 text-accent text-xs px-2 py-1 rounded-full">
+              {/* <span className="bg-accent/20 text-accent text-xs px-2 py-1 rounded-full">
                 PRO
-              </span>
+              </span> */}
             </div>
           </div>
         </div>

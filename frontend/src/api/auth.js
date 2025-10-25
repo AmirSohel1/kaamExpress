@@ -18,6 +18,7 @@ export const login = async (email, password) => {
 export const signup = async (data) => {
   try {
     const res = await api.post("/auth/register", data);
+    console.log(res.data);
     const { token, user } = res.data;
     return { token, user };
   } catch (err) {

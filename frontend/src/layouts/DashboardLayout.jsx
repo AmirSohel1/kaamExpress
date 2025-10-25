@@ -1,7 +1,7 @@
 // DashboardLayout.js (Fixed and Enhanced)
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
+import Navbar from "../components/common/navbar/Navbar";
+import Sidebar from "../components/common/sidebar/Sidebar";
 import { Outlet, useLocation } from "react-router-dom";
 
 const DashboardLayout = () => {
