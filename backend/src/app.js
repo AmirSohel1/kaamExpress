@@ -9,18 +9,22 @@ require("dotenv").config();
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:5173", process.env.FRONTEND_URL];
+const normalizeOrigin = (o) => (o ? o.trim().replace(/\/$/, "") : o);
+const allowedOrigins = ["http://localhost:5173", process.env.FRONTEND_URL]
+  .filter(Boolean)
+  .map(normalizeOrigin);
 
 // ✅ CORS must be at the top
 app.use(
   cors({
     origin: function (origin, callback) {
+      // Allow non-browser or same-origin requests (no Origin header)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+      const normalized = normalizeOrigin(origin);
+      if (allowedOrigins.includes(normalized)) {
+        return callback(null, true);
       }
+      return callback(new Error("Not allowed by CORS: " + origin));
     },
     credentials: true,
   })
@@ -35,7 +39,18 @@ app.use(cookieParser());
 // app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 
 // ✅ Handle OPTIONS preflight requests globally
-app.options("*", cors());
+app.options(
+  "*",
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      const normalized = normalizeOrigin(origin);
+      if (allowedOrigins.includes(normalized)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS (preflight): " + origin));
+    },
+    credentials: true,
+  })
+);
 
 // Routes
 app.use("/api", routes);
