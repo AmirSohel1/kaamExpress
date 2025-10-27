@@ -7,6 +7,9 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  // If your backend uses cookies for auth or sends cookies, enable this.
+  // Set to true only if you expect cookies (sameSite/settings on server).
+  withCredentials: true,
 });
 
 // Automatically add token from localStorage (set by AuthContext)
