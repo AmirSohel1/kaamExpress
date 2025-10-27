@@ -27,24 +27,35 @@ const allowedOrigins = [
 ]
   .filter(Boolean)
   .map(normalizeOrigin);
+// Log configured allowed origins so we can verify what Render is using
+console.log("Configured allowed origins:", allowedOrigins);
 
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
     const normalized = normalizeOrigin(origin);
     // Helpful debug log for deployment troubleshooting (will show in server logs)
-    if (!allowedOrigins.includes(normalized)) {
-      console.warn(
-        "Blocked CORS request from origin:",
-        origin,
-        "normalized:",
-        normalized,
-        "allowed:",
-        allowedOrigins
-      );
-      return callback(new Error("Not allowed by CORS: " + origin));
+    if (allowedOrigins.includes(normalized)) {
+      return callback(null, true);
     }
-    return callback(null, true);
+
+    // Allow common hosting provider domains used for preview/deploys if needed
+    // (quick fix: allow any Vercel preview/production domains). You can remove
+    // this if you prefer only explicit origins via FRONTEND_URL(S).
+    if (normalized.endsWith(".vercel.app")) {
+      console.warn("Allowing vercel.app origin (dynamic):", normalized);
+      return callback(null, true);
+    }
+
+    console.warn(
+      "Blocked CORS request from origin:",
+      origin,
+      "normalized:",
+      normalized,
+      "allowed:",
+      allowedOrigins
+    );
+    return callback(new Error("Not allowed by CORS: " + origin));
   },
   credentials: true,
 };
@@ -63,6 +74,13 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api", routes);
+// Debug route to check incoming Origin and allowed origins (safe to remove later)
+app.get("/debug/cors", (req, res) => {
+  return res.json({
+    originHeader: req.get("origin") || null,
+    allowedOrigins,
+  });
+});
 
 app.get("/", (req, res) => {
   res.send("Welcome to the KaamExpress API");
