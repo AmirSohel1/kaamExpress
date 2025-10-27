@@ -29,7 +29,9 @@ app.options("*", cors(corsOptions)); // Preflight requests
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
+app.use(
+  helmet({ crossOriginResourcePolicy: false, crossOriginOpenerPolicy: false })
+);
 app.use(morgan("dev"));
 app.use(cookieParser());
 
